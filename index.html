@@ -4,8 +4,11 @@
         <title>webapp file converter</title>
         <meta charset="UTF-8">
         
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
-
+        <script src="js/vendors/jquery-2.1.4.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/vendors/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
+          
+        <link href="css/vendors/jquery-ui.min.css" rel="stylesheet" type="text/css">
+         
         <style>    
             #dropzone {
                 width: 400px;
@@ -34,9 +37,9 @@
         <br>
         <div class="info">the file will be converted and downloaded right away</div>
         <br><br>
-        <div class="info"><small><b>this is just a mockup for now</b>: downloads the file that was uploaded, only changes the filename</small></div>
+        <div class="info"><small><b>just a mockup for now</b>: downloads the file that was uploaded, only changes the filename</small></div>
         <br>
-        <div class="info"><small>tested successfully on Chrome and Firefox (drag and drop not too fast), doesn't work on Safari at the moment</small></div>
+        <div class="info"><small>tested successfully on Chrome and Firefox (don't drag and drop too fast), doesn't work on Safari at the moment</small></div>
 
         <script>
         
@@ -53,7 +56,7 @@
             };
 
             function handleFileSelect(evt) {                 
-                //$('#dropzone').effect('highlight', {}, 1200);
+                $('#dropzone').effect('highlight', {}, 1200);
                 evt.stopPropagation();
                 evt.preventDefault();
                 var file = evt.dataTransfer.files[0];
