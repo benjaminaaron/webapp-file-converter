@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+    <head>
+        <title>webapp file converter</title>
+        <meta charset="UTF-8">
+        
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+
+        <style>    
+            #dropzone {
+                width: 400px;
+                margin: 0 auto;
+                border: 2px dashed #bbb;
+                -moz-border-radius: 5px;
+                -webkit-border-radius: 5px;
+                border-radius: 5px;
+                padding: 25px;
+                text-align: center;
+                font: 20pt bold 'Vollkorn';
+                color: #bbb;
+            }
+            html * {
+                font-family: Georgia, serif;
+            }
+            .info {
+                text-align: center;
+                color: #999;
+            }
+        </style>
+    </head>
+    <body>
+        <br>
+        <div id="dropzone">drop .scenario file here</div> <!-- via www.html5rocks.com/en/tutorials/file/dndfiles -->
+        <br>
+        <div class="info">the file will be converted and downloaded right away</div>
+        <br><br>
+        <div class="info"><small><b>this is just a mockup for now</b>: downloads the file that was uploaded, only changes the filename</small></div>
+        <br>
+        <div class="info"><small>tested successfully on Chrome and Firefox (drag and drop not too fast), doesn't work on Safari at the moment</small></div>
+
+        <script>
+        
+            var filecontent = '';
+
+            var dropzone = document.getElementById('dropzone');
+            dropzone.addEventListener('dragover', handleDragOver, false);
+            dropzone.addEventListener('drop', handleFileSelect, false);
+        
+            function handleDragOver(evt) {
+                evt.stopPropagation();
+                evt.preventDefault();
+                evt.dataTransfer.dropEffect = 'copy';
+            };
+
+            function handleFileSelect(evt) {                 
+                //$('#dropzone').effect('highlight', {}, 1200);
+                evt.stopPropagation();
+                evt.preventDefault();
+                var file = evt.dataTransfer.files[0];
+                //console.log(file.name + ' / ' + file.type + ' / ' + file.size + ' / ' + file.lastModifiedDate);
+                
+                var reader = new FileReader();
+                reader.onload = (function() {
+                    return function(e) {
+                        filecontent = e.target.result;
+                        processFile();
+                    };
+                })();
+                reader.readAsText(file);
+            };
+
+            function processFile(){
+                //console.log(filecontent);
+                download(filecontent, 'converted_file.txt')
+            };
+            
+            function download(content, filename){
+                var element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+                element.setAttribute('download', filename);
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            };
+
+        </script>
+    </body>
+</html>
