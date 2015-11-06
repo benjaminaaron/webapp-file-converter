@@ -6,10 +6,18 @@
         
         <script src="js/vendors/jquery-2.1.4.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/vendors/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
-          
+
         <link href="css/vendors/jquery-ui.min.css" rel="stylesheet" type="text/css">
          
         <style>    
+            html * {
+                font-family: Georgia, serif;
+            }
+            a {
+                text-decoration: none;
+                color: #bbb;
+                background-color: #eee;
+            }
             #dropzone {
                 width: 400px;
                 margin: 0 auto;
@@ -22,9 +30,6 @@
                 font: 20pt bold 'Vollkorn';
                 color: #bbb;
             }
-            html * {
-                font-family: Georgia, serif;
-            }
             .info {
                 text-align: center;
                 color: #999;
@@ -33,25 +38,74 @@
                 display: block;
                 margin-left: auto;
                 margin-right: auto;
-                width: 200px;
                 height: auto;
+            }
+            #selectors {
+                display: table;
+                margin: 0 auto;
             }
         </style>
     </head>
     <body>
         <br>
-        <img src="meme.jpg">
+        <img width="200px" src="files/meme.jpg">
         <br><br>
         <div id="dropzone">drop file here</div> <!-- via www.html5rocks.com/en/tutorials/file/dndfiles -->
         <br>
         <div class="info">the file will be converted and downloaded right away</div>
-        <br><br>
-        <div class="info"><small><b>just a mockup for now</b>: downloads the file that was uploaded, only changes the filename</small></div>
         <br>
-        <div class="info"><small>tested successfully on Chrome and Firefox (don't drag and drop too fast), doesn't work on Safari at the moment</small></div>
+        <div id="selectors">
+            <select id="sourceFormatSelector">
+                <option value="*">*</option>
+                <option value="txt">txt</option>
+                <option value="csv">csv</option>
+                <option value="json">json</option>
+                <option value="xml">xml</option>
+            </select>
+            <font color="silver">&nbsp;&nbsp;&rarr;&nbsp;&nbsp;</font>
+            <select id="targetFormatSelector">
+                <option value="txt">txt</option>
+                <option value="csv">csv</option>
+                <option value="json">json</option>
+                <option value="xml">xml</option>
+            </select>
+            <img id="getLink" width="25px" src="files/getLink.png">
+        </div>    
+        <br><br><br><br><br><br><br><br>
+        <div style="text-align:center; color: #ccc;"><small><b>just a mockup for now</b>: downloads the file that was uploaded, only changes the filename
+            <br>tested successfully on Chrome and Firefox (don't drag and drop too fast), doesn't work on Safari at the moment
+            <br><a href="https://github.com/benjaminaaron/webapp-file-converter">github.com/benjaminaaron/webapp-file-converter</a></small>
+        </div>
 
         <script>
+    
+            var domain = window.location.href;
+            var sourceFormat = $('#sourceFormatSelector').val()
+            var targetFormat = $('#targetFormatSelector').val();
+                    
+            $('#getLink').on('click', function (e) {       
+                alert(domain + '?' + sourceFormat + '-' + targetFormat);
+            });
         
+            $('#sourceFormatSelector').on('change', function (e) {
+                sourceFormat = $(this).val();
+            });
+            
+            $('#targetFormatSelector').on('change', function (e) {
+                targetFormat = $(this).val();
+            });
+            
+            var urlParams = window.location.search;
+            
+            if(urlParams.length > 0){
+                domain = domain.substring(0, domain.length - urlParams.length);
+                urlParams = urlParams.substring(1, urlParams.length);
+                sourceFormat = urlParams.split('-')[0];
+                targetFormat = urlParams.split('-')[1];
+                $('#sourceFormatSelector').val(sourceFormat);
+                $('#targetFormatSelector').val(targetFormat);
+            }
+
             var filecontent = '';
 
             var dropzone = document.getElementById('dropzone');
@@ -71,19 +125,30 @@
                 var file = evt.dataTransfer.files[0];
                 //console.log(file.name + ' / ' + file.type + ' / ' + file.size + ' / ' + file.lastModifiedDate);
                 
-                var reader = new FileReader();
-                reader.onload = (function() {
-                    return function(e) {
-                        filecontent = e.target.result;
-                        processFile();
-                    };
-                })();
-                reader.readAsText(file);
+                var fileOK = sourceFormat == '*' ? true : false;
+                var filenameParts = file.name.split('\.');
+                if(!fileOK && filenameParts.length > 0)
+                    if(filenameParts[filenameParts.length - 1] == sourceFormat)
+                        fileOK = true;
+                                                
+                if(fileOK){
+                    var reader = new FileReader();
+                    reader.onload = (function() {
+                        return function(e) {
+                            filecontent = e.target.result;
+                            processFile();
+                        };
+                    })();
+                    reader.readAsText(file);
+                }
+                else {
+                    alert('that\'s not a .' + sourceFormat + ' file');
+                }
             };
 
             function processFile(){
                 //console.log(filecontent);
-                download(filecontent, 'converted_file.txt')
+                download(filecontent, 'converted_file.' + targetFormat);
             };
             
             function download(content, filename){
