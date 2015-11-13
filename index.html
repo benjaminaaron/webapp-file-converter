@@ -46,64 +46,60 @@
                 margin-right: auto;
                 height: auto;
             }
-            #selectors {
+            #conversionModeSelector {
                 display: table;
                 margin: 0 auto;
+            }
+            .inactive {
+                color: #ccc
+            }
+            select {
+                color: #009
             }
         </style>
     </head>
     <body>
-        <br>
+        <br><br>
         <img width="200px" src="files/meme.jpg">
         <br><br>
         <div id="dropzone">drop file here</div> <!-- via www.html5rocks.com/en/tutorials/file/dndfiles -->
-        <br>
-        <div class="info">the file will be converted and "downloaded" (no upload, all happens locally) right away</div>
         <br><br>
-        <div id="selectors">
-            <select id="sourceFormatSelector">
-                <option value="redmine-issues-csv">redmine issues .csv</option>
-                <option value="*">*</option>
-                <option value="txt">txt</option>
-                <option value="csv">csv</option>
-                <option value="json">json</option>
-                <option value="xml">xml</option>
-            </select>
-            <font color="silver">&nbsp;&nbsp;&rarr;&nbsp;&nbsp;</font>
-            <select id="targetFormatSelector">
-                <option value="graphml">graphml</option>
-                <option value="txt">txt</option>
-                <option value="csv">csv</option>
-                <option value="json">json</option>
-                <option value="xml">xml</option>
-            </select>
-            <br><br>
-            <img id="getLink" width="25px" src="files/getLink.png">
-        </div>    
-        <br><br><br><br><br><br><br><br>
-        <div style="text-align:center; color: #ccc;"><small><b>just a mockup for now</b>: downloads the file that was uploaded, only changes the filename
-            <br>tested successfully on Chrome and Firefox (don't drag and drop too fast), doesn't work on Safari at the moment
-            <br><a href="https://github.com/benjaminaaron/webapp-file-converter">github.com/benjaminaaron/webapp-file-converter</a></small>
+        <select id="conversionModeSelector">
+            <option value="redmineIssuesCSV-graphml">redmine issues csv &nbsp;&rarr;&nbsp; graphml</option>
+            <option class="inactive" value="csv-xml">csv &nbsp;&rarr;&nbsp; xml</option>
+            <option class="inactive" value="json-xml">json &nbsp;&rarr;&nbsp; xml</option>
+            <option class="inactive" value="xml-csv">xml &nbsp;&rarr;&nbsp; csv</option>
+            <option class="inactive" value="xml-json">xml &nbsp;&rarr;&nbsp; json</option>
+        </select>        
+        <!--<br><br><img id="getLink" width="25px" src="files/getLink.png">-->
+        <br><br>
+        <div class="info">
+            the file will be converted and "downloaded" (no upload, all happens locally) right away
         </div>
+        <div class="info"><small>
+            tested successfully on Chrome and Firefox (don't drag and drop too fast), doesn't work on Safari at the moment
+        </small></div>
 
         <script>
-        
-            //console.log( CSVToArray( this.value, ' ' ) );
     
             var domain = window.location.href;
-            var sourceFormat = $('#sourceFormatSelector').val()
-            var targetFormat = $('#targetFormatSelector').val();
-                    
+            var converters = [];
+            converters['redmineIssuesCSV-graphml'] = new RedmineParser();
+            var converter = converters[$('#conversionModeSelector').val()];
+                                
             $('#getLink').on('click', function (e) {       
-                alert(domain + '?' + sourceFormat + '-' + targetFormat);
+                alert(domain + '?' + conversionMode);
             });
         
-            $('#sourceFormatSelector').on('change', function (e) {
-                sourceFormat = $(this).val();
-            });
-            
-            $('#targetFormatSelector').on('change', function (e) {
-                targetFormat = $(this).val();
+            $('#conversionModeSelector').on('change', function (e) {
+                var conversionMode = $(this).val();    
+                if(converters[conversionMode]){
+                    converter = converters[conversionMode];
+                }
+                else {
+                    alert('This converter isn\'t implemented yet.');
+                    //TODO set selector back to fallback
+                }
             });
             
             var urlParams = window.location.search;
@@ -160,16 +156,11 @@
                 }
             };
 
-            function processFile(){
-                //console.log(filecontent);
-                //console.log(sourceFormat);
-                //console.log(targetFormat);
-                
+            function processFile(){                
                 switch(sourceFormat + '_' + targetFormat) {
                   case 'redmine-issues-csv_graphml':
                       
-                      var rp = new RedmineParser();
-                      
+                      var rp = new RedmineParser();                  
                       rp.readFile(filecontent);
                       
                       break;
