@@ -4,11 +4,17 @@
         <title>webapp file converter</title>
         <meta charset="UTF-8">
         
+        <!-- vendors -->
         <script src="js/vendors/jquery-2.1.4.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/vendors/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
-
         <link href="css/vendors/jquery-ui.min.css" rel="stylesheet" type="text/css">
-         
+        
+        <script src="js/vendors/CSVToArray.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- selfmade converters -->
+        <script src="js/RedmineParser.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/GraphmlExporter.js" type="text/javascript" charset="utf-8"></script>
+
         <style>    
             html * {
                 font-family: Georgia, serif;
@@ -32,7 +38,7 @@
             }
             .info {
                 text-align: center;
-                color: #999;
+                color: #ccc;
             }
             img {
                 display: block;
@@ -52,10 +58,11 @@
         <br><br>
         <div id="dropzone">drop file here</div> <!-- via www.html5rocks.com/en/tutorials/file/dndfiles -->
         <br>
-        <div class="info">the file will be converted and downloaded right away</div>
-        <br>
+        <div class="info">the file will be converted and "downloaded" (no upload, all happens locally) right away</div>
+        <br><br>
         <div id="selectors">
             <select id="sourceFormatSelector">
+                <option value="redmine-issues-csv">redmine issues .csv</option>
                 <option value="*">*</option>
                 <option value="txt">txt</option>
                 <option value="csv">csv</option>
@@ -64,11 +71,13 @@
             </select>
             <font color="silver">&nbsp;&nbsp;&rarr;&nbsp;&nbsp;</font>
             <select id="targetFormatSelector">
+                <option value="graphml">graphml</option>
                 <option value="txt">txt</option>
                 <option value="csv">csv</option>
                 <option value="json">json</option>
                 <option value="xml">xml</option>
             </select>
+            <br><br>
             <img id="getLink" width="25px" src="files/getLink.png">
         </div>    
         <br><br><br><br><br><br><br><br>
@@ -78,6 +87,8 @@
         </div>
 
         <script>
+        
+            //console.log( CSVToArray( this.value, ' ' ) );
     
             var domain = window.location.href;
             var sourceFormat = $('#sourceFormatSelector').val()
@@ -125,11 +136,14 @@
                 var file = evt.dataTransfer.files[0];
                 //console.log(file.name + ' / ' + file.type + ' / ' + file.size + ' / ' + file.lastModifiedDate);
                 
+                var fileOK = true; //TODO
+                /*
                 var fileOK = sourceFormat == '*' ? true : false;
                 var filenameParts = file.name.split('\.');
                 if(!fileOK && filenameParts.length > 0)
                     if(filenameParts[filenameParts.length - 1] == sourceFormat)
                         fileOK = true;
+                */
                                                 
                 if(fileOK){
                     var reader = new FileReader();
@@ -148,7 +162,22 @@
 
             function processFile(){
                 //console.log(filecontent);
-                download(filecontent, 'converted_file.' + targetFormat);
+                //console.log(sourceFormat);
+                //console.log(targetFormat);
+                
+                switch(sourceFormat + '_' + targetFormat) {
+                  case 'redmine-issues-csv_graphml':
+                      
+                      var rp = new RedmineParser();
+                      
+                      rp.readFile(filecontent);
+                      
+                      break;
+                  default:
+                      alert('conversion not implemented yet');
+              }
+                
+                //download(filecontent, 'converted_file.' + targetFormat);
             };
             
             function download(content, filename){
