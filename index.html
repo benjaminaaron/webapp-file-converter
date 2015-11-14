@@ -19,11 +19,11 @@
             html * {
                 font-family: Georgia, serif;
             }
-            a {
+            /*a {
                 text-decoration: none;
                 color: #bbb;
                 background-color: #eee;
-            }
+            }*/
             #dropzone {
                 width: 400px;
                 margin: 0 auto;
@@ -33,7 +33,7 @@
                 border-radius: 5px;
                 padding: 25px;
                 text-align: center;
-                font: 20pt bold 'Vollkorn';
+                font: 20pt bold;
                 color: #bbb;
             }
             .info {
@@ -50,12 +50,12 @@
                 display: table;
                 margin: 0 auto;
             }
-            .inactive {
+            /*.inactive {
                 color: #ccc
             }
             select {
                 color: #009
-            }
+            }*/
         </style>
     </head>
     <body>
@@ -66,10 +66,10 @@
         <br><br>
         <select id="conversionModeSelector">
             <option value="redmineIssuesCSV-graphml">redmine issues csv &nbsp;&rarr;&nbsp; graphml</option>
-            <option class="inactive" value="csv-xml">csv &nbsp;&rarr;&nbsp; xml</option>
-            <option class="inactive" value="json-xml">json &nbsp;&rarr;&nbsp; xml</option>
-            <option class="inactive" value="xml-csv">xml &nbsp;&rarr;&nbsp; csv</option>
-            <option class="inactive" value="xml-json">xml &nbsp;&rarr;&nbsp; json</option>
+            <option value="csv-xml">csv &nbsp;&rarr;&nbsp; xml</option>
+            <option value="json-xml">json &nbsp;&rarr;&nbsp; xml</option>
+            <option value="xml-csv">xml &nbsp;&rarr;&nbsp; csv</option>
+            <option value="xml-json">xml &nbsp;&rarr;&nbsp; json</option>
         </select>        
         <!--<br><br><img id="getLink" width="25px" src="files/getLink.png">-->
         <br><br>
@@ -84,21 +84,22 @@
     
             var domain = window.location.href;
             var converters = [];
-            converters['redmineIssuesCSV-graphml'] = new RedmineParser();
-            var converter = converters[$('#conversionModeSelector').val()];
+            var conversionMode = $('#conversionModeSelector').val();
+            converters[conversionMode] = new RedmineParser();
+            var converter = converters[conversionMode];
                                 
             $('#getLink').on('click', function (e) {       
                 alert(domain + '?' + conversionMode);
             });
         
             $('#conversionModeSelector').on('change', function (e) {
-                var conversionMode = $(this).val();    
+                conversionMode = $(this).val();    
                 if(converters[conversionMode]){
                     converter = converters[conversionMode];
                 }
                 else {
                     alert('This converter isn\'t implemented yet.');
-                    //TODO set selector back to fallback
+                    $(this)[0].selectedIndex = 0; //TODO fallback to last valid one instead of index 0
                 }
             });
             
@@ -107,10 +108,9 @@
             if(urlParams.length > 0){
                 domain = domain.substring(0, domain.length - urlParams.length);
                 urlParams = urlParams.substring(1, urlParams.length);
-                sourceFormat = urlParams.split('-')[0];
-                targetFormat = urlParams.split('-')[1];
-                $('#sourceFormatSelector').val(sourceFormat);
-                $('#targetFormatSelector').val(targetFormat);
+                conversionMode = urlParams;    
+                converter = converters[conversionMode]; //TODO catch error
+                $('#conversionModeSelector').val(conversionMode);
             }
 
             var filecontent = '';
@@ -131,15 +131,11 @@
                 evt.preventDefault();
                 var file = evt.dataTransfer.files[0];
                 //console.log(file.name + ' / ' + file.type + ' / ' + file.size + ' / ' + file.lastModifiedDate);
-                
-                var fileOK = true; //TODO
-                /*
-                var fileOK = sourceFormat == '*' ? true : false;
+                    
+                var fileOK = false;
                 var filenameParts = file.name.split('\.');
-                if(!fileOK && filenameParts.length > 0)
-                    if(filenameParts[filenameParts.length - 1] == sourceFormat)
-                        fileOK = true;
-                */
+                if(filenameParts.length > 0)
+                    fileOK = converter.sourceFormatOK(filenameParts[filenameParts.length - 1]);
                                                 
                 if(fileOK){
                     var reader = new FileReader();
@@ -149,26 +145,16 @@
                             processFile();
                         };
                     })();
-                    reader.readAsText(file);
+                    reader.readAsText(file, 'windows-1252');
                 }
                 else {
-                    alert('that\'s not a .' + sourceFormat + ' file');
+                    alert('that\'s not a valid source file');
                 }
             };
 
-            function processFile(){                
-                switch(sourceFormat + '_' + targetFormat) {
-                  case 'redmine-issues-csv_graphml':
-                      
-                      var rp = new RedmineParser();                  
-                      rp.readFile(filecontent);
-                      
-                      break;
-                  default:
-                      alert('conversion not implemented yet');
-              }
-                
-                //download(filecontent, 'converted_file.' + targetFormat);
+            function processFile(){
+                var convertedFile = converter.readFile(filecontent); 
+                download(convertedFile, converter.getTargetFilename());
             };
             
             function download(content, filename){

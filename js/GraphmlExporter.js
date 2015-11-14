@@ -16,21 +16,28 @@ GraphmlExporter.prototype = {
         var edgeCounter = 0;
         for(i in this.nodes){
           	var node = this.nodes[i];
-           	content += this.getNodeCode(node.ID, node.getLabel(), '#FFCC00');
-            if(node.parent != null)
-                content += this.getEdgeCode(edgeCounter ++, node.parent.ID, node.ID, '');
+			var nodecontent = this.getNodeCode(node.id, node.getLabel(), node.getHovertext(), '');
+			content += nodecontent;
+			
+			var edgecontent = '';
+            if(node.parentId != undefined)
+				edgecontent = this.getEdgeCode(edgeCounter ++, node.parentId, node.id, '');
+			else
+				if(node.id != '0') //otherwise an edge from root to root
+					edgecontent = this.getEdgeCode(edgeCounter ++, '0', node.id, ''); // connect to root
+			content += edgecontent;
         }
 
         return content + "</graph>\n</graphml>";
 	},
 
-	getNodeCode: function(ID, label, color){
+	getNodeCode: function(ID, label, hovertext, color){
 		return "<node id=" + '"' + ID + '"' + ">" +
-                "<data key=\"d5\"><![CDATA[Node ID: " + ID + "]]></data>" +
+                "<data key=\"d5\"><![CDATA[" + hovertext + "]]></data>" +
                 "<data key=\"d6\">" +
                 "<y:ShapeNode><y:Fill hasColor=\"false\" transparent=\"false\"/>" +
                 "<y:BorderStyle hasColor=\"false\" type=\"line\" width=\"1.0\"/>" +
-                "<y:NodeLabel fontFamily=\"Courier New\" textColor=\"#000000\">" + label + "</y:NodeLabel>" +
+                "<y:NodeLabel fontFamily=\"Dialog\" textColor=\"#000000\">" + label + "</y:NodeLabel>" +
                 "<y:Shape type=\"ellipse\"/></y:ShapeNode></data></node>";
 	},
 
