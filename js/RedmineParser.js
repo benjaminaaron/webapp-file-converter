@@ -8,7 +8,8 @@ RedmineParser.prototype = {
         var header = csvfile[0];
         
         var nodes = [];
-        nodes.push(new Node('0', undefined, 'root', '', ''));
+        //var root = new Node('0', undefined, 'root', undefined, undefined);
+        //nodes.push(root);
         var distinctAssigneeNames = [];
         
         var indexParentTask = header.indexOf('Parent task');
@@ -20,8 +21,8 @@ RedmineParser.prototype = {
             var line = csvfile[i];
                                     
             var assignee = line[indexAssignee];
-            if(distinctAssigneeNames.indexOf(assignee) == -1)
-                distinctAssigneeNames.push(assignee); 
+            if(!distinctAssigneeNames[assignee])
+                distinctAssigneeNames[assignee] = ''; 
                 
             var parentTaskStr = parentTaskId = line[indexParentTask];
             if(parentTaskStr != undefined)
@@ -29,6 +30,15 @@ RedmineParser.prototype = {
                 
             nodes.push(new Node(line[0], parentTaskId, line[indexSubject], assignee, line[indexCategory]));
         }        
+        
+        for (var key in distinctAssigneeNames)
+            if (distinctAssigneeNames.hasOwnProperty(key))
+                distinctAssigneeNames[key] = Colors.random();
+        distinctAssigneeNames['undefined'] = '#cccccc';
+        
+        for(i in nodes)
+            nodes[i].color = distinctAssigneeNames[nodes[i].assignee];
+        //root.color = '#ffffff';
         
         var graphmlExporter = new GraphmlExporter(nodes);
         var content = graphmlExporter.getContent();
@@ -45,7 +55,7 @@ RedmineParser.prototype = {
     },
     
     getTargetFilename: function(){
-        return 'converted_file.graphml';
+        return 'RedmineIssuesGraph.graphml';
     }
     
 };
@@ -56,16 +66,20 @@ var Node = function(id, parentId, subject, assignee, category){
     this.subject = subject;
     this.assignee = assignee;
     this.category = category;
+    this.color;
 };
 
 Node.prototype = {
     
     getLabel: function(){
-        return '#' + this.id + ': ' + this.subject;
+        var subject = this.subject == undefined || this.subject == '' ? '\nno subject' : this.subject;
+        var category = this.category == undefined ? '' : ' [' + this.category + ']';
+        var assignee = this.assignee == undefined ? '' : '\n' + this.assignee;
+        return '#' + this.id + category + '\n' + subject + assignee;
     },
     
-    getHovertext: function(){
-        return 'parent: #' + this.parentId + ', ' + this.category + ', ' + this.assignee;
+    getLinewidth: function(){
+        return this.assignee == undefined ? 1 : 5;
     }
 };
 

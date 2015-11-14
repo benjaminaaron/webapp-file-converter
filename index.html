@@ -8,10 +8,11 @@
         <script src="js/vendors/jquery-2.1.4.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/vendors/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
         <link href="css/vendors/jquery-ui.min.css" rel="stylesheet" type="text/css">
-        
+
         <script src="js/vendors/CSVToArray.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- selfmade converters -->
+        <script src="js/utils.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/RedmineParser.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/GraphmlExporter.js" type="text/javascript" charset="utf-8"></script>
 
@@ -46,8 +47,7 @@
                 margin-right: auto;
                 height: auto;
             }
-            #conversionModeSelector {
-                display: table;
+            #selector-table {
                 margin: 0 auto;
             }
             /*.inactive {
@@ -64,13 +64,19 @@
         <br><br>
         <div id="dropzone">drop file here</div> <!-- via www.html5rocks.com/en/tutorials/file/dndfiles -->
         <br><br>
-        <select id="conversionModeSelector">
-            <option value="redmineIssuesCSV-graphml">redmine issues csv &nbsp;&rarr;&nbsp; graphml</option>
-            <option value="csv-xml">csv &nbsp;&rarr;&nbsp; xml</option>
-            <option value="json-xml">json &nbsp;&rarr;&nbsp; xml</option>
-            <option value="xml-csv">xml &nbsp;&rarr;&nbsp; csv</option>
-            <option value="xml-json">xml &nbsp;&rarr;&nbsp; json</option>
-        </select>        
+        <table id='selector-table'>
+            <tr><td>
+                <img id="info-icon" width="20px" src="files/info.png">
+            </td><td>&nbsp;</td><td>
+                <select id="conversionModeSelector">
+                    <option value="redmineIssuesCSV-graphml">redmine issues csv &nbsp;&rarr;&nbsp; graphml</option>
+                    <option value="csv-xml">csv &nbsp;&rarr;&nbsp; xml</option>
+                    <option value="json-xml">json &nbsp;&rarr;&nbsp; xml</option>
+                    <option value="xml-csv">xml &nbsp;&rarr;&nbsp; csv</option>
+                    <option value="xml-json">xml &nbsp;&rarr;&nbsp; json</option>
+                </select>    
+            </td>
+        </table>    
         <!--<br><br><img id="getLink" width="25px" src="files/getLink.png">-->
         <br><br>
         <div class="info">
@@ -79,9 +85,27 @@
         <div class="info"><small>
             tested successfully on Chrome and Firefox (don't drag and drop too fast), doesn't work on Safari at the moment
         </small></div>
+        
+        
+        <div id="popup-pre" title="input file">
+            In Redmine go to the bottom of <i>Issues</i> and export <i>All Columns</i> as <i>CSV</i>.
+        </div>
+        
+        <div id="popup-post" title="opening in yEd">
+            Open the graphml-file in yEd.<br><br>
+            Go to <i>Tools > Fit Node to Label ></i> uncheck <i>Ignore Height</i> and press <i>OK</i>.<br><br>
+            Go to Layout and choose your layout algorithm. <i>Tree > Directed</i> looks good for instance.
+        </div>
 
         <script>
     
+            $('#popup-pre').hide();
+            $('#popup-post').hide();
+            
+            $('#info-icon').on('click', function (e) {       
+                $('#popup-pre').dialog();
+            });
+            
             var domain = window.location.href;
             var converters = [];
             var conversionMode = $('#conversionModeSelector').val();
@@ -155,6 +179,7 @@
             function processFile(){
                 var convertedFile = converter.readFile(filecontent); 
                 download(convertedFile, converter.getTargetFilename());
+                $('#popup-post').dialog();
             };
             
             function download(content, filename){
