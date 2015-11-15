@@ -56,6 +56,14 @@ RedmineParser.prototype = {
     
     getTargetFilename: function(){
         return 'RedmineIssuesGraph.graphml';
+    },
+    
+    getPopupPreText: function(){
+        return 'In Redmine go to the bottom of <i>Issues</i> and <i>export All Columns</i> as CSV.';
+    },
+    
+    getPopupPostText: function(){
+        return 'Open the graphml-file in <a href=\"http://www.yworks.com/products/yed\">yEd</a>.<br><br>Go to <i>Tools > Fit Node to Label ></i> uncheck <i>Ignore Height</i> and press <i>OK</i>.<br><br>Go to Layout and choose your layout algorithm. <i>Tree > Directed</i> looks good for instance.';
     }
     
 };
@@ -75,7 +83,8 @@ Node.prototype = {
         var subject = this.subject == undefined || this.subject == '' ? '\nno subject' : this.subject;
         var category = this.category == undefined ? '' : ' [' + this.category + ']';
         var assignee = this.assignee == undefined ? '' : '\n' + this.assignee;
-        return '#' + this.id + category + '\n' + subject + assignee;
+        var label = '#' + this.id + category + '\n' + subject + assignee;
+        return replaceAll("&", "&amp;", label);
     },
     
     getLinewidth: function(){

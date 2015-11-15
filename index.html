@@ -84,23 +84,16 @@
             tested successfully on Chrome and Firefox (don't drag and drop too fast), doesn't work on Safari at the moment
         </small></div>
         
-        
-        <div id="popup-pre" title="input file">
-            In Redmine go to the bottom of <i>Issues</i> and export <i>All Columns</i> as <i>CSV</i>.
-        </div>
-        
-        <div id="popup-post" title="opening in yEd">
-            Open the graphml-file in <a href="http://www.yworks.com/products/yed">yEd</a>.<br><br>
-            Go to <i>Tools > Fit Node to Label ></i> uncheck <i>Ignore Height</i> and press <i>OK</i>.<br><br>
-            Go to Layout and choose your layout algorithm. <i>Tree > Directed</i> looks good for instance.
-        </div>
+        <div id="popup-pre" title="input file"></div>
+        <div id="popup-post" title="output file"></div>
 
         <script>
     
             $('#popup-pre').hide();
             $('#popup-post').hide();
             
-            $('#info-icon').on('click', function (e) {       
+            $('#info-icon').on('click', function (e) {
+                document.getElementById('popup-pre').innerHTML = converter.getPopupPreText();
                 $('#popup-pre').dialog();
             });
             
@@ -177,6 +170,7 @@
             function processFile(){
                 var convertedFile = converter.readFile(filecontent); 
                 download(convertedFile, converter.getTargetFilename());
+                document.getElementById('popup-post').innerHTML = converter.getPopupPostText();
                 $('#popup-post').dialog();
             };
             
