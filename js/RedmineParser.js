@@ -16,6 +16,7 @@ RedmineParser.prototype = {
         var indexSubject = header.indexOf('Subject');
         var indexAssignee = header.indexOf('Assignee');
         var indexCategory = header.indexOf('Category');
+        var indexClosed = header.indexOf('Closed');
         
         for(var i = 1; i < csvfile.length - 1; i ++){ //first line is header, last line is empty
             var line = csvfile[i];
@@ -28,7 +29,9 @@ RedmineParser.prototype = {
             if(parentTaskStr != undefined)
                 parentTaskId = parentTaskStr.substring(parentTaskStr.indexOf('#') + 1, parentTaskStr.indexOf(':'));
                 
-            nodes.push(new Node(line[0], parentTaskId, line[indexSubject], assignee, line[indexCategory]));
+            var isClosed = line[indexClosed] != undefined;
+                
+            nodes.push(new Node(line[0], parentTaskId, line[indexSubject], assignee, line[indexCategory], isClosed));
         }        
         
         for (var key in distinctAssigneeNames)
@@ -68,12 +71,13 @@ RedmineParser.prototype = {
     
 };
 
-var Node = function(id, parentId, subject, assignee, category){
+var Node = function(id, parentId, subject, assignee, category, isClosed){
     this.id = id;
     this.parentId = parentId;
     this.subject = subject;
     this.assignee = assignee;
     this.category = category;
+    this.isClosed = isClosed;
     this.color;
 };
 
@@ -87,8 +91,20 @@ Node.prototype = {
         return replaceAll("&", "&amp;", label);
     },
     
+    getNodeColor: function(){
+        return this.color;
+    },
+    
+    getTextColor: function(){
+        return this.isClosed ? '#999999' : '#000000';
+    },
+    
+    getFontStyle: function(){
+        return this.isClosed ? 'italic' : 'plain';
+    },
+    
     getLinewidth: function(){
-        return this.assignee == undefined ? 1 : 5;
+        return this.assignee == undefined || this.isClosed ? 2 : 5;
     }
 };
 

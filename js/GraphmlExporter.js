@@ -16,7 +16,7 @@ GraphmlExporter.prototype = {
         var edgeCounter = 0;
         for(i in this.nodes){
           	var node = this.nodes[i];
-			var nodecontent = this.getNodeCode(node.id, node.getLabel(), node.color, node.getLinewidth());
+			var nodecontent = this.getNodeCode(node.id, node.getLabel(), node.getNodeColor(), node.getLinewidth(), node.getTextColor(), node.getFontStyle());
 			content += nodecontent;
 			
 			var edgecontent = '';
@@ -33,14 +33,14 @@ GraphmlExporter.prototype = {
         return content + "</graph>\n</graphml>";
 	},
 
-	getNodeCode: function(ID, label, color, linewidth){
+	getNodeCode: function(ID, label, color, linewidth, textcolor, fontstyle){
 		return "<node id=" + '"' + ID + '"' + ">" +
                 "<data key=\"d5\"><![CDATA[" + label + "]]></data>" +
                 "<data key=\"d6\">" +
                 "<y:ShapeNode><y:Fill hasColor=\"false\" transparent=\"false\"/>" +
                 //"<y:BorderStyle hasColor=\"false\" type=\"line\" width=\"1.0\"/>" +
 				 "<y:BorderStyle color=\"" + color + "\" type=\"line\" width=\"" + linewidth + "\"/>" +
-                "<y:NodeLabel fontFamily=\"Dialog\" textColor=\"#000000\">" + label + "</y:NodeLabel>" +
+                "<y:NodeLabel fontFamily=\"Dialog\" fontStyle=\"" + fontstyle + "\" textColor=\"" + textcolor + "\">" + label + "</y:NodeLabel>" +
                 "<y:Shape type=\"roundrectangle\"/></y:ShapeNode></data></node>";
 	},
 
