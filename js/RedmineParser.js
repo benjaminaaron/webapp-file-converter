@@ -57,6 +57,10 @@ RedmineParser.prototype = {
             return false;
     },
     
+    getExpectedExtensions: function(){
+        return '.csv';
+    },
+    
     getTargetFilename: function(){
         return 'RedmineIssuesGraph.graphml';
     },

@@ -48,6 +48,10 @@
             #selector-table {
                 margin: 0 auto;
             }
+            a {
+                color: #999;
+                font-size: 75%;
+            }
             /*.inactive {
                 color: #ccc
             }
@@ -57,6 +61,10 @@
         </style>
     </head>
     <body>
+        
+        <!-- vendors -->
+        <script src="js/vendors/notie.js" type="text/javascript" charset="utf-8"></script>
+
         <br><br>
         <img width="200px" src="files/meme.jpg">
         <br><br>
@@ -64,7 +72,7 @@
         <br><br>
         <table id='selector-table'>
             <tr><td>
-                <img id="info-icon" width="20px" src="files/info.png">
+                <a id="preinfo-link" href="#">pre info</a>
             </td><td>&nbsp;</td><td>
                 <select id="conversionModeSelector">
                     <option value="redmineIssuesCSV-graphml">redmine issues csv &nbsp;&rarr;&nbsp; graphml</option>
@@ -73,9 +81,10 @@
                     <option value="xml-csv">xml &nbsp;&rarr;&nbsp; csv</option>
                     <option value="xml-json">xml &nbsp;&rarr;&nbsp; json</option>
                 </select>    
+            </td><td>&nbsp;</td><td>
+                <a id="postinfo-link" href="#">post info</a>
             </td>
         </table>    
-        <!--<br><br><img id="getLink" width="25px" src="files/getLink.png">-->
         <br><br>
         <div class="info">
             the file will be converted and "downloaded" (no upload, all happens locally) right away
@@ -84,28 +93,26 @@
             tested successfully on Chrome and Firefox (don't drag and drop too fast), doesn't work on Safari at the moment
         </small></div>
         
-        <div id="popup-pre" title="input file"></div>
-        <div id="popup-post" title="output file"></div>
-
         <script>
-    
-            $('#popup-pre').hide();
-            $('#popup-post').hide();
             
-            $('#info-icon').on('click', function (e) {
-                document.getElementById('popup-pre').innerHTML = converter.getPopupPreText();
-                $('#popup-pre').dialog();
-            });
+            document.getElementById('preinfo-link').onclick = function(){
+                notie.alert(4, converter.getPopupPreText(), 5);
+            };
+            document.getElementById('postinfo-link').onclick = function(){
+                notie.alert(4, converter.getPopupPostText(), 10);
+            };
             
             var domain = window.location.href;
             var converters = [];
             var conversionMode = $('#conversionModeSelector').val();
             converters[conversionMode] = new RedmineParser();
             var converter = converters[conversionMode];
-                                
-            $('#getLink').on('click', function (e) {       
-                alert(domain + '?' + conversionMode);
+            
+            /*                    
+            $('#getLink').on('click', function (e) {
+                notie.alert(3, domain + '?' + conversionMode, 4);
             });
+            */
         
             $('#conversionModeSelector').on('change', function (e) {
                 conversionMode = $(this).val();    
@@ -113,7 +120,7 @@
                     converter = converters[conversionMode];
                 }
                 else {
-                    alert('This converter isn\'t implemented yet.');
+                    notie.alert(3, 'this converter isn\'t implemented yet', 2);
                     $(this)[0].selectedIndex = 0; //TODO fallback to last valid one instead of index 0
                 }
             });
@@ -163,15 +170,13 @@
                     reader.readAsText(file, 'windows-1252');
                 }
                 else {
-                    alert('that\'s not a valid source file');
+                    notie.alert(3, 'that\'s not a valid source file, expecting ' + converter.getExpectedExtensions(), 2);
                 }
             };
 
             function processFile(){
                 var convertedFile = converter.readFile(filecontent); 
                 download(convertedFile, converter.getTargetFilename());
-                document.getElementById('popup-post').innerHTML = converter.getPopupPostText();
-                $('#popup-post').dialog();
             };
             
             function download(content, filename){
