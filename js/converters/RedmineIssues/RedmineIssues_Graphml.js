@@ -40,6 +40,7 @@ GraphmlExporter.prototype = {
         var edgeCounter = 0;
         for(i in this.nodes){
           	var node = this.nodes[i];
+            var nodeLabel = replaceAll("&", "&amp;", node.getLabel());
 			var nodecontent = this.getNodeCode(node.id, node.getLabel(), node.getNodeColor(), node.getLinewidth(), node.getTextColor(), node.getFontStyle());
 			content += nodecontent;
 			

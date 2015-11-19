@@ -73,16 +73,20 @@ var Node = function(id, parentId, subject, assignee, category, isClosed){
     this.category = category;
     this.isClosed = isClosed;
     this.color;
+    this.shape = 'box';
 };
 
 Node.prototype = {
+    
+    makeLabel: function(){
+        this.label = this.getLabel();
+    },
     
     getLabel: function(){
         var subject = this.subject == undefined || this.subject == '' ? '\nno subject' : this.subject;
         var category = this.category == undefined ? '' : ' [' + this.category + ']';
         var assignee = this.assignee == undefined ? '' : '\n' + this.assignee;
-        var label = '#' + this.id + category + '\n' + subject + assignee;
-        return replaceAll("&", "&amp;", label);
+        return '#' + this.id + category + '\n' + subject + assignee;
     },
     
     getNodeColor: function(){
