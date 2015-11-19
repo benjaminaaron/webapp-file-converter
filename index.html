@@ -56,12 +56,20 @@
             #notie-alert-text a {
                 color: #fff;
             }
+            
             /*.inactive {
                 color: #ccc
             }
             select {
                 color: #009
             }*/
+        
+            #browser-view-container { // only for vis.js atm
+              width: 100px;
+              height: 100px;
+              border: 1px solid lightgray;
+              font: 10pt sans;
+            }
         </style>
     </head>
     <body>
@@ -69,33 +77,37 @@
         <!-- vendors -->
         <script src="js/vendors/notie.js" type="text/javascript" charset="utf-8"></script>
 
-        <br><br>
-        <img width="200px" src="files/meme.jpg">
-        <br><br>
-        <div id="dropzone">drop file here</div> <!-- via www.html5rocks.com/en/tutorials/file/dndfiles -->
-        <br><br>
-        <table id='selector-table'>
-            <tr><td>
-                <a id="preinfo-link" href="#">pre info</a>
-            </td><td>&nbsp;</td><td>
-                <select id="conversionModeSelector">
-                    <option value="redmineIssuesCSV-graphml">redmine issues csv &nbsp;&rarr;&nbsp; graphml</option>
-                    <option value="csv-xml">csv &nbsp;&rarr;&nbsp; xml</option>
-                    <option value="json-xml">json &nbsp;&rarr;&nbsp; xml</option>
-                    <option value="xml-csv">xml &nbsp;&rarr;&nbsp; csv</option>
-                    <option value="xml-json">xml &nbsp;&rarr;&nbsp; json</option>
-                </select>    
-            </td><td>&nbsp;</td><td>
-                <a id="postinfo-link" href="#">post info</a>
-            </td>
-        </table>    
-        <br><br>
-        <!--<div class="info">
-            the file will be converted and "downloaded" (no upload, all happens locally) right away
-        </div>-->
-        <div class="info"><small>
-            tested successfully on Chrome and Firefox (don't drag and drop too fast), doesn't work on Safari at the moment
-        </small></div>
+        <div id="container">
+            <br><br>
+            <img width="200px" src="files/meme.jpg">
+            <br><br>
+            <div id="dropzone">drop file here</div> <!-- via www.html5rocks.com/en/tutorials/file/dndfiles -->
+            <br><br>
+            <table id='selector-table'>
+                <tr><td>
+                    <a id="preinfo-link" href="#">pre info</a>
+                </td><td>&nbsp;</td><td>
+                    <select id="conversionModeSelector">
+                        <option value="redmineissues-visjs">redmine issues csv &nbsp;&rarr;&nbsp; visjs</option>
+                        <option value="redmineissues-graphml">redmine issues csv &nbsp;&rarr;&nbsp; graphml</option>
+                        <option value="csv-xml">csv &nbsp;&rarr;&nbsp; xml</option>
+                        <option value="json-xml">json &nbsp;&rarr;&nbsp; xml</option>
+                        <option value="xml-csv">xml &nbsp;&rarr;&nbsp; csv</option>
+                        <option value="xml-json">xml &nbsp;&rarr;&nbsp; json</option>
+                    </select>    
+                </td><td>&nbsp;</td><td>
+                    <a id="postinfo-link" href="#">post info</a>
+                </td>
+            </table>    
+            <br><br>
+            <!--<div class="info">
+                the file will be converted and "downloaded" (no upload, all happens locally) right away
+            </div>-->
+            <div class="info"><small>
+                tested successfully on Chrome and Firefox (don't drag and drop too fast), doesn't work on Safari at the moment
+            </small></div>
+        </div>
+        <div id="browser-view-container" style="display: none;"></div>
         
         <script>
             
@@ -107,10 +119,19 @@
             };
             
             var domain = window.location.href;
-            var converters = [];
             var conversionMode = $('#conversionModeSelector').val();
-            var converter = new RedmineIssues_Graphml();
-            converters[conversionMode] = converter;
+            var converter = getConverter(conversionMode);
+            
+            function getConverter(conversionMode){
+                switch(conversionMode){
+                    case 'redmineissues-visjs':
+                        return new RedmineIssues_visjs();
+                    case 'redmineissues-graphml':
+                        return new RedmineIssues_Graphml();
+                    default:
+                        return null;
+                };
+            };
                         
             /*                    
             $('#getLink').on('click', function (e) {
@@ -120,8 +141,9 @@
         
             $('#conversionModeSelector').on('change', function (e) {
                 conversionMode = $(this).val();    
-                if(converters[conversionMode]){
-                    converter = converters[conversionMode];
+                var newConverter = getConverter(conversionMode);
+                if(newConverter != null){
+                    converter = newConverter;
                 }
                 else {
                     notie.alert(3, 'this converter isn\'t implemented yet', 2);
@@ -130,14 +152,14 @@
             });
             
             var urlParams = window.location.search;
-            
             if(urlParams.length > 0){
                 domain = domain.substring(0, domain.length - urlParams.length);
                 urlParams = urlParams.substring(1, urlParams.length);
-                conversionMode = urlParams;    
-                converter = converters[conversionMode]; //TODO catch error
-                $('#conversionModeSelector').val(conversionMode);
-            }
+                conversionMode = urlParams;  
+                //TODO catch error
+                $('#conversionModeSelector').val(conversionMode);  
+                converter = getConverter(conversionMode); 
+            };
 
             var filecontent = '';
 
@@ -192,6 +214,10 @@
                 document.body.appendChild(element);
                 element.click();
                 document.body.removeChild(element);
+            };
+            
+            function hideContainer(){
+                $('#container').hide();
             };
 
         </script>

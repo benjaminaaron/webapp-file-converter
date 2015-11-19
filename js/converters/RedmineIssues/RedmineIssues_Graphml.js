@@ -17,7 +17,7 @@ RedmineIssues_Graphml.prototype = {
     },
     
     getPopupPostText: function(){
-        return 'Open the graphml-file in <a href=\"http://www.yworks.com/products/yed\">yEd</a>.<br><br>Go to <i>Tools > Fit Node to Label ></i> uncheck <i>Ignore Height</i> and press <i>OK</i>.<br><br>Go to Layout and choose your layout algorithm. <i>Tree > Directed</i> looks good for instance.';
+        return 'open the graphml-file in <a href=\"http://www.yworks.com/products/yed\">yEd</a><br><br>go to <i>Tools > Fit Node to Label ></i> uncheck <i>Ignore Height</i> and press <i>OK</i><br><br>go to Layout and choose your layout algorithm<br><i>Tree > Directed</i> looks good for instance';
     }
 };
 

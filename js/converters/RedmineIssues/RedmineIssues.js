@@ -60,7 +60,7 @@ RedmineIssues.prototype = {
     },
         
     getPopupPreText: function(){
-        return 'In Redmine go to the bottom of <i>Issues</i> and <i>export All Columns</i> as CSV.';
+        return 'in Redmine go to the bottom of <i>Issues</i> and <i>export All Columns</i> as CSV';
     }
     
 };
