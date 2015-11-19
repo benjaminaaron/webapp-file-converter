@@ -7,12 +7,16 @@
         <!-- vendors -->
         <script src="js/vendors/jquery-2.1.4.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="js/vendors/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/vendors/vis.js" type="text/javascript" charset="utf-8"></script>
         <link href="css/vendors/jquery-ui.min.css" rel="stylesheet" type="text/css">
+        <link href="css/vendors/vis.css" rel="stylesheet" type="text/css">
 
         <!-- selfmade converters -->
         <script src="js/utils.js" type="text/javascript" charset="utf-8"></script>
-        <script src="js/RedmineParser.js" type="text/javascript" charset="utf-8"></script>
-        <script src="js/GraphmlExporter.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/Converter.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/converters/RedmineIssues/RedmineIssues.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/converters/RedmineIssues/RedmineIssues_Graphml.js" type="text/javascript" charset="utf-8"></script>
+        <script src="js/converters/RedmineIssues/RedmineIssues_visjs.js" type="text/javascript" charset="utf-8"></script>
 
         <style>    
             html * {
@@ -86,9 +90,9 @@
             </td>
         </table>    
         <br><br>
-        <div class="info">
+        <!--<div class="info">
             the file will be converted and "downloaded" (no upload, all happens locally) right away
-        </div>
+        </div>-->
         <div class="info"><small>
             tested successfully on Chrome and Firefox (don't drag and drop too fast), doesn't work on Safari at the moment
         </small></div>
@@ -105,9 +109,9 @@
             var domain = window.location.href;
             var converters = [];
             var conversionMode = $('#conversionModeSelector').val();
-            converters[conversionMode] = new RedmineParser();
-            var converter = converters[conversionMode];
-            
+            var converter = new RedmineIssues_Graphml();
+            converters[conversionMode] = converter;
+                        
             /*                    
             $('#getLink').on('click', function (e) {
                 notie.alert(3, domain + '?' + conversionMode, 4);
@@ -167,7 +171,7 @@
                             processFile();
                         };
                     })();
-                    reader.readAsText(file, 'windows-1252');
+                    reader.readAsText(file, 'windows-1252'); //TODO
                 }
                 else {
                     notie.alert(3, 'that\'s not a valid source file, expecting ' + converter.getExpectedExtensions(), 2);
@@ -176,7 +180,8 @@
 
             function processFile(){
                 var convertedFile = converter.readFile(filecontent); 
-                download(convertedFile, converter.getTargetFilename());
+                if(converter.doDownload())                
+                    download(convertedFile, converter.getTargetFilename());
             };
             
             function download(content, filename){

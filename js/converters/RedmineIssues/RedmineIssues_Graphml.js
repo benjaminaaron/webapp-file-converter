@@ -1,4 +1,28 @@
 
+var RedmineIssues_Graphml = function(){
+    RedmineIssues.call(this);
+};
+
+RedmineIssues_Graphml.prototype = {
+    __proto__: RedmineIssues.prototype,
+    
+    readFile: function(filecontent){
+        RedmineIssues.prototype.readFile.call(this, filecontent);
+        var graphmlExporter = new GraphmlExporter(this.nodes);
+        return graphmlExporter.getContent();
+    },
+
+    getTargetFilename: function(){
+        return 'RedmineIssuesGraph.graphml';
+    },
+    
+    getPopupPostText: function(){
+        return 'Open the graphml-file in <a href=\"http://www.yworks.com/products/yed\">yEd</a>.<br><br>Go to <i>Tools > Fit Node to Label ></i> uncheck <i>Ignore Height</i> and press <i>OK</i>.<br><br>Go to Layout and choose your layout algorithm. <i>Tree > Directed</i> looks good for instance.';
+    }
+};
+
+
+
 var GraphmlExporter = function(nodes){
 	this.nodes = nodes;
 };
@@ -53,5 +77,4 @@ GraphmlExporter.prototype = {
                 "<y:EdgeLabel>" + edgelabel + "</y:EdgeLabel>" +
                 "</y:BezierEdge></data></edge>";
 	}
-    
 };

@@ -1,13 +1,17 @@
 
-var RedmineParser = function(){};
+var RedmineIssues = function(){
+    Converter.call(this);
+};
 
-RedmineParser.prototype = {
+RedmineIssues.prototype = {
+    
+    __proto__: Converter.prototype,
     
     readFile: function(filecontent){
         var csvfile = CSVToArray(filecontent, ',');
         var header = csvfile[0];
         
-        var nodes = [];
+        this.nodes = [];
         //var root = new Node('0', undefined, 'root', undefined, undefined);
         //nodes.push(root);
         var distinctAssigneeNames = [];
@@ -31,7 +35,7 @@ RedmineParser.prototype = {
                 
             var isClosed = line[indexClosed] != undefined;
                 
-            nodes.push(new Node(line[0], parentTaskId, line[indexSubject], assignee, line[indexCategory], isClosed));
+            this.nodes.push(new Node(line[0], parentTaskId, line[indexSubject], assignee, line[indexCategory], isClosed));
         }        
         
         for (var key in distinctAssigneeNames)
@@ -39,15 +43,9 @@ RedmineParser.prototype = {
                 distinctAssigneeNames[key] = Colors.random();
         distinctAssigneeNames['undefined'] = '#cccccc';
         
-        for(i in nodes)
-            nodes[i].color = distinctAssigneeNames[nodes[i].assignee];
+        for(i in this.nodes)
+            this.nodes[i].color = distinctAssigneeNames[this.nodes[i].assignee];
         //root.color = '#ffffff';
-        
-        var graphmlExporter = new GraphmlExporter(nodes);
-        var content = graphmlExporter.getContent();
-        
-        //console.log(content);
-        return content;
     },
     
     sourceFormatOK: function(extension){
@@ -60,17 +58,9 @@ RedmineParser.prototype = {
     getExpectedExtensions: function(){
         return '.csv';
     },
-    
-    getTargetFilename: function(){
-        return 'RedmineIssuesGraph.graphml';
-    },
-    
+        
     getPopupPreText: function(){
         return 'In Redmine go to the bottom of <i>Issues</i> and <i>export All Columns</i> as CSV.';
-    },
-    
-    getPopupPostText: function(){
-        return 'Open the graphml-file in <a href=\"http://www.yworks.com/products/yed\">yEd</a>.<br><br>Go to <i>Tools > Fit Node to Label ></i> uncheck <i>Ignore Height</i> and press <i>OK</i>.<br><br>Go to Layout and choose your layout algorithm. <i>Tree > Directed</i> looks good for instance.';
     }
     
 };
@@ -111,6 +101,3 @@ Node.prototype = {
         return this.assignee == undefined || this.isClosed ? 2 : 5;
     }
 };
-
-
-
