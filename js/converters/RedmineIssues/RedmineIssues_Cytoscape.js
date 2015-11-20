@@ -1,28 +1,40 @@
 
 var RedmineIssues_Cytoscape = function(){
+    this.addRoot = false;
+    this.layoutRankDir = 'LR';
     RedmineIssues.call(this);
 };
 
 RedmineIssues_Cytoscape.prototype = {
     __proto__: RedmineIssues.prototype,
     
+    settingsDialog: function(){    
+        notie.confirm('Add a root node?', 'Yes', 'No', this.rootYesCallback.bind(this), this.rootNoCallback.bind(this));
+    },
+    
+    rootYesCallback: function(){
+        this.settingsDialog2(true);
+    },
+    
+    rootNoCallback: function(){
+        this.settingsDialog2(false);
+    },
+    
+    settingsDialog2: function(addRoot){
+        this.addRoot = addRoot;
+        notie.confirm('Layout direction?', 'top to bottom', 'left to right', this.layoutTopToBottomCallback.bind(this), this.layoutLeftToRightCallback.bind(this));
+    },    
+    
+    layoutTopToBottomCallback: function(){
+        this.layoutRankDir = 'TB';
+    },
+    
+    layoutLeftToRightCallback: function(){
+        this.layoutRankDir = 'LR';
+    },
+    
     readFile: function(filecontent){
-        this.filecontent = filecontent;
-        notie.confirm('Do you want to add a root node?', 'Yes', 'No', this.yes_callback.bind(this), this.no_callback.bind(this));
-    },
-    
-    yes_callback: function(){
-        this.addRoot = true;
-        this.readFileContinue();
-    },
-    
-    no_callback: function(){
-        this.addRoot = false;
-        this.readFileContinue();
-    },
-    
-    readFileContinue: function(){
-        RedmineIssues.prototype.readFile.call(this, this.filecontent, this.addRoot);
+        RedmineIssues.prototype.readFile.call(this, filecontent, this.addRoot);
         
         hideContainer();
         $('#browser-view-container')
@@ -30,7 +42,7 @@ RedmineIssues_Cytoscape.prototype = {
             .height($(document).height() * 0.95)
             .show();
                 
-        var graph = new CytoscapeGraphviewer(document.getElementById('browser-view-container'), this.nodes, this.addRoot);
+        var graph = new CytoscapeGraphviewer(document.getElementById('browser-view-container'), this.nodes, this.addRoot, this.layoutRankDir);
         graph.draw();
     },    
     
@@ -39,24 +51,26 @@ RedmineIssues_Cytoscape.prototype = {
     },
     
     getPopupPostText: function(){
-        return 'renders the graph of all issues right here in the browser using <a href="http://js.cytoscape.org/">Cytoscape.js</a>'; //TODO
+        return 'renders the graph of all issues right here in the browser using <a href="http://js.cytoscape.org/">Cytoscape.js</a><br>drag nodes around if you wish';
     }
 };
 
 
 
-var CytoscapeGraphviewer = function(container, nodes, addRoot){
+var CytoscapeGraphviewer = function(container, nodes, addRoot, layoutRankDir){
     this.container = container;
+    this.layoutRankDir = layoutRankDir;
     this.nodes = [];
     this.edges = [];
     for(i in nodes){
         var node = nodes[i];
-        this.nodes.push({data : {id: node.id, col: node.getNodeColor(), content: node.getLabel()}}); 
+        var fontstyle = node.isClosed ? 'italic' : 'normal';
+        this.nodes.push({data : {id: node.id, bordercolor: node.getNodeColor(), label: node.getLabel(), fontstyle: fontstyle, textcolor: node.getTextColor(), borderwidth: node.getLinewidth(), backgroundcolor: node.getBrighterColor()}}); 
         if(node.parentId != undefined)
-            this.edges.push({data : {source: node.parentId, target: node.id}});         
+            this.edges.push({data : {source: node.parentId, target: node.id, linecolor: '#cccccc', linewidth: 2}});         
         else 
             if(addRoot && node.id != '0')
-                this.edges.push({data : {source: 0, target: node.id}});       
+                this.edges.push({data : {source: 0, target: node.id, linecolor: '#dddddd', linewidth: 1}});       
     };    
 };
 
@@ -67,7 +81,8 @@ CytoscapeGraphviewer.prototype = {
         var cy = window.cy = cytoscape({
             container: this.container,
             layout: {
-                name: 'dagre'//'dagre' //cose
+                name: 'dagre', //cose
+                rankDir: this.layoutRankDir
             },
             style: [
                 {
@@ -76,22 +91,24 @@ CytoscapeGraphviewer.prototype = {
                         'width': 'label',
                         'height': 'label',
                         'shape': 'roundrectangle',
-                        'content': 'data(content)',
-                        'text-opacity': 1,
                         'text-valign': 'center',
                         'text-halign': 'center',
                         'text-wrap' : 'wrap',
-                        'background-color': 'data(col)',
-                        //'font-style' : 'italic'
+                        'background-color': 'data(backgroundcolor)',
+                        'content': 'data(label)',
+                        'font-style' : 'data(fontstyle)',
+                        'color' : 'data(textcolor)',
+                        'border-width' : 'data(borderwidth)',
+                        'border-color' : 'data(bordercolor)'
                     }
                 },
                 {
                     selector: 'edge',
                     style: {
-                        'width': 2,
                         'target-arrow-shape': 'triangle',
-                        'line-color': '#dddddd',
-                        'target-arrow-color': '#dddddd'
+                        'width': 'data(linewidth)',
+                        'line-color': 'data(linecolor)',
+                        'target-arrow-color': 'data(linecolor)'
                     }
                 }
             ],

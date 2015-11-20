@@ -5,6 +5,10 @@ var Converter = function(){
 
 Converter.prototype = {
     
+    settingsDialog: function(){
+        notie.alert(2, 'no options to set');   
+    },
+    
     readFile: function(filecontent){
     },
     

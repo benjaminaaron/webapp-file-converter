@@ -66,7 +66,7 @@ RedmineIssues.prototype = {
     },
         
     getPopupPreText: function(){
-        return 'in Redmine go to the bottom of <i>Issues</i> and <i>export All Columns</i> as CSV';
+        return 'in Redmine go to the bottom of <i>Issues</i> and <i>export All Columns</i> as CSV<br>you may choose and apply Status \'any\' instead of \'open\' at the top to include closed issues';
     }
     
 };
@@ -94,15 +94,19 @@ Node.prototype = {
         return this.color;
     },
     
-    getTextColor: function(){
-        return this.isClosed ? '#999999' : '#000000';
+    getBrighterColor: function(){
+        return increaseBrightness(this.color, 75);
     },
     
-    getFontStyle: function(){
+    getTextColor: function(){
+        return this.isClosed ? '#bbbbbb' : '#000000';
+    },
+    
+    getFontStyle: function(){ // for graphml, cytoscope needs normal instead of plain
         return this.isClosed ? 'italic' : 'plain';
     },
     
     getLinewidth: function(){
-        return this.assignee == undefined || this.isClosed ? 2 : 5;
+        return this.assignee == undefined || this.isClosed ? 2 : 6;
     }
 };

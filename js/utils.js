@@ -102,7 +102,7 @@ Colors.names = {
 	mediumspringgreen: "#00fa9a",
 	mediumturquoise: "#48d1cc",
 	mediumvioletred: "#c71585",
-	midnightblue: "#191970",
+	//midnightblue: "#191970",
 	mintcream: "#f5fffa",
 	mistyrose: "#ffe4e1",
 	moccasin: "#ffe4b5",
@@ -180,4 +180,18 @@ function CSVToArray( strData, strDelimiter ){
         arrData[ arrData.length - 1 ].push( strMatchedValue );
       }
       return( arrData );
+};
+
+// from http://stackoverflow.com/a/6444043
+function increaseBrightness(hex, percent){
+    hex = hex.replace(/^\s*#|\s*$/g, '');
+    if(hex.length == 3)
+        hex = hex.replace(/(.)/g, '$1$1');
+    var r = parseInt(hex.substr(0, 2), 16),
+        g = parseInt(hex.substr(2, 2), 16),
+        b = parseInt(hex.substr(4, 2), 16);
+    return '#' +
+       ((0|(1<<8) + r + (256 - r) * percent / 100).toString(16)).substr(1) +
+       ((0|(1<<8) + g + (256 - g) * percent / 100).toString(16)).substr(1) +
+       ((0|(1<<8) + b + (256 - b) * percent / 100).toString(16)).substr(1);
 };
