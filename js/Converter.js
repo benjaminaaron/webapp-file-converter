@@ -5,6 +5,9 @@ var Converter = function(){
 
 Converter.prototype = {
     
+    getTitle: function(){    
+    },
+    
     settingsDialog: function(){
         notie.alert(2, 'no options to set');   
     },
@@ -15,7 +18,7 @@ Converter.prototype = {
     sourceFormatOK: function(extension){
     },
     
-    getExpectedExtensions: function(){
+    getExpectedExtension: function(){
     },
     
     doDownload: function(){

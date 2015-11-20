@@ -61,8 +61,8 @@ RedmineIssues.prototype = {
             return false;
     },
     
-    getExpectedExtensions: function(){
-        return '.csv';
+    getExpectedExtension: function(){
+        return 'csv';
     },
         
     getPopupPreText: function(){

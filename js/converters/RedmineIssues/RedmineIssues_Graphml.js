@@ -6,6 +6,10 @@ var RedmineIssues_Graphml = function(){
 RedmineIssues_Graphml.prototype = {
     __proto__: RedmineIssues.prototype,
     
+    getTitle: function(){    
+        return 'Redmine Issues CSV &rarr; graphml';
+    },
+    
     readFile: function(filecontent){
         RedmineIssues.prototype.readFile.call(this, filecontent, false);
         var graphmlExporter = new GraphmlExporter(this.nodes);

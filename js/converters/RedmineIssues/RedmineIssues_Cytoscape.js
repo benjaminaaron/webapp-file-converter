@@ -8,6 +8,10 @@ var RedmineIssues_Cytoscape = function(){
 RedmineIssues_Cytoscape.prototype = {
     __proto__: RedmineIssues.prototype,
     
+    getTitle: function(){    
+        return 'Redmine Issues CSV &rarr; Cytoscape.js (browser)';
+    },
+    
     settingsDialog: function(){    
         notie.confirm('Add a root node?', 'Yes', 'No', this.rootYesCallback.bind(this), this.rootNoCallback.bind(this));
     },
@@ -35,15 +39,15 @@ RedmineIssues_Cytoscape.prototype = {
     
     readFile: function(filecontent){
         RedmineIssues.prototype.readFile.call(this, filecontent, this.addRoot);
-        
-        hideContainer();
-        $('#browser-view-container')
-            .width($(document).width() * 0.95) //or window
-            .height($(document).height() * 0.95)
-            .show();
-                
-        var graph = new CytoscapeGraphviewer(document.getElementById('browser-view-container'), this.nodes, this.addRoot, this.layoutRankDir);
-        graph.draw();
+        var self = this;
+        $('#container').fadeOut('fast', function() {        
+            $('#browser-view-container')
+                .width($(document).width() * 0.95) //or window
+                .height($(document).height() * 0.95)
+                .show();
+            var graph = new CytoscapeGraphviewer(document.getElementById('browser-view-container'), self.nodes, self.addRoot, self.layoutRankDir);
+            graph.draw();
+        });
     },    
     
     doDownload: function(){

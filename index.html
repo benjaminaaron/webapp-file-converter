@@ -23,7 +23,7 @@
 
         <style>    
             html * {
-                font-family: Georgia, serif;
+                font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif
             }
             #dropzone {
                 width: 400px;
@@ -34,17 +34,28 @@
                 border-radius: 20px;
                 padding: 25px;
                 text-align: center;
-                font: 20pt bold;
+                font-style: bold;
+                font-size: large;
                 color: #bbb;
             }
             .predrop {
                 border: 2px dashed #0f0 !important;
                 background-color: #ffff99;
             }
-            /*.info { //combine with <small>
-                text-align: center;
+            .footer {
+                font-size: small;
                 color: #ddd;
-            }*/
+                position: fixed; 
+                bottom: 0; 
+                width: 100%; 
+                text-align: center
+            }
+            #converter-title{
+                text-align: center;
+                color: #191970;
+                font-style: bold;
+                font-size: x-large;
+            }
             #memepic {
                 display: block;
                 margin-left: auto;
@@ -54,7 +65,7 @@
             #selector-table {
                 margin: 0 auto;
             }
-            #selector-table a {
+            #selector-table a, #footer a {
                 text-decoration: none;
                 color: #999;
                 background-color: #eee;
@@ -71,7 +82,6 @@
                 top: 0;
                 z-index: 999;
                 /*border: 1px solid lightgray;*/
-                font: 10pt sans;
             }
         </style>
     </head>
@@ -80,32 +90,39 @@
         <!-- vendors -->
         <script src="js/vendors/notie.js" type="text/javascript" charset="utf-8"></script>
 
+        <input id="file-chooser" type="file" style="display: none;"/>
+
         <div id="container">
             <br><br>
-            <img id="memepic" width="200px" src="files/meme.jpg">
+            <img id="memepic" width="188px" src="files/meme.jpg">
+            <div id="converter-title" style="display: none;">converter title</div>
             <br><br>
-            <div id="dropzone">drop file here</div> <!-- via www.html5rocks.com/en/tutorials/file/dndfiles -->
+            <div id="dropzone">drop <span id="dropzone-extension"></span> file here, or&nbsp;&nbsp;<input type="button" disabled="true" id="file-chooser-btn" value="Choose File"/></div>
             <br><br>
             <table id='selector-table'>
                 <tr><td>
-                    <a id="preinfo-link" href="#">pre info</a>
+                    <a id="preinfo-link" class="links" href="#" style="display: none;">pre info</a>
                 </td><td>&nbsp;</td><td>
                     <select id="converterSelector">
+                        <option value="-">&rarr; choose a converter</option>
                         <option value="redmineissues-cytoscape">redmine issues csv &nbsp;&rarr;&nbsp; cytoscape</option>
                         <option value="redmineissues-graphml">redmine issues csv &nbsp;&rarr;&nbsp; graphml</option>
-                        <option value="xml-csv">xml &nbsp;&rarr;&nbsp; csv</option>
                         <option value="xml-json">xml &nbsp;&rarr;&nbsp; json</option>
+                        <option value="*-*">* &nbsp;&rarr;&nbsp; ...</option>
                     </select>    
                 </td><td>&nbsp;</td><td>
-                    <a id="settings-link" href="#">settings</a>    
+                    <a id="settings-link" class="links" href="#" style="display: none;">settings</a>    
                 </td><td>&nbsp;</td><td>
-                    <a id="postinfo-link" href="#">post info</a>
+                    <a id="postinfo-link" class="links" href="#" style="display: none;">post info</a>
                 </td>
-            </table>    
+            </table>
+            <div class="footer"><p>@benjaminaaron, Nov 2015</p></div>
         </div>
         <div id="browser-view-container" style="display: none;"></div>
-        
+
         <script>
+        
+            //var isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
 
             document.getElementById('preinfo-link').onclick = function(){
                 notie.alert(4, converter.getPopupPreText(), 5);
@@ -116,21 +133,51 @@
             document.getElementById('postinfo-link').onclick = function(){
                 notie.alert(4, converter.getPopupPostText(), 10);
             };
+            
+            $('#file-chooser').on('change', function(){
+                processFile(this.files[0]);
+            });
+            
+            $('#file-chooser-btn').click(function(e){
+              $('#file-chooser').click();
+          });
 
-            var converterStr = $('#converterSelector').val();
-            setConverter(converterStr);
+            var converterStr = '';
+            var converter = null;
             
             function setConverter(converterStr){
+                converter = null;
                 switch(converterStr){
                     case 'redmineissues-cytoscape':
                         converter = new RedmineIssues_Cytoscape();
-                        return true;
+                        break;
                     case 'redmineissues-graphml':
                         converter = new RedmineIssues_Graphml();
-                        return true;
+                        break;
+                    case '-':
+                        break;
                     default:
-                        return false;
+                        converterNotImplementedYet();
                 };
+                
+                if(converter)
+                    $('#memepic').fadeOut('fast', function(){        
+                        $('#converter-title')
+                            .html('<br><br><br>' + converter.getTitle() + '<br>')
+                            .fadeIn();
+                        $('.links').fadeIn();
+                        $('#dropzone-extension').text('.' + converter.getExpectedExtension());
+                        document.getElementById('file-chooser-btn').disabled = false;
+                        return true;  
+                    });
+                else
+                    $('#converter-title').fadeOut('fast', function(){
+                        $('#memepic').fadeIn();
+                        $('.links').fadeOut();
+                        $('#dropzone-extension').text();
+                        document.getElementById('file-chooser-btn').disabled = true;
+                        return false;
+                    });
             };
                         
             /*                    
@@ -140,9 +187,7 @@
             */
         
             $('#converterSelector').on('change', function (e) {
-                converterStr = $(this).val();
-                if(!setConverter(converterStr))
-                    converterNotImplementedYet();
+                setConverter($(this).val());
             });
             
             function converterNotImplementedYet(){
@@ -155,9 +200,7 @@
             if(urlParams.length > 0){
                 domain = domain.substring(0, domain.length - urlParams.length);
                 converterStr = urlParams.substring(1, urlParams.length);                
-                if(!setConverter(converterStr))
-                    converterNotImplementedYet();
-                else
+                if(setConverter(converterStr))
                     $('#converterSelector').val(converterStr); 
             };
 
@@ -185,33 +228,34 @@
                 $('#dropzone').effect('highlight', {}, 1200);
                 evt.stopPropagation();
                 evt.preventDefault();
-                var file = evt.dataTransfer.files[0];
-                //console.log(file.name + ' / ' + file.type + ' / ' + file.size + ' / ' + file.lastModifiedDate);
-                    
-                var fileOK = false;
-                var filenameParts = file.name.split('\.');
-                if(filenameParts.length > 0)
-                    fileOK = converter.sourceFormatOK(filenameParts[filenameParts.length - 1]);
-                                                
-                if(fileOK){
-                    var reader = new FileReader();
-                    reader.onload = (function() {
-                        return function(e) {
-                            filecontent = e.target.result;
-                            processFile();
-                        };
-                    })();
-                    reader.readAsText(file, 'windows-1252'); //TODO
-                }
-                else {
-                    notie.alert(3, 'that\'s not a valid source file, expecting ' + converter.getExpectedExtensions(), 2);
-                }
+                processFile(evt.dataTransfer.files[0]);
             };
 
-            function processFile(){            
-                var convertedFile = converter.readFile(filecontent); 
-                if(converter.doDownload())                
-                    download(convertedFile, converter.getTargetFilename());
+            function processFile(file){            
+                //console.log(file.name + ' / ' + file.type + ' / ' + file.size + ' / ' + file.lastModifiedDate);
+                if(converter){
+                    var fileOK = false;
+                    var filenameParts = file.name.split('\.');
+                    if(filenameParts.length > 0)
+                        fileOK = converter.sourceFormatOK(filenameParts[filenameParts.length - 1]);
+                                                    
+                    if(fileOK){
+                        var reader = new FileReader();
+                        reader.onload = (function() {
+                            return function(e) {
+                                filecontent = e.target.result;
+                                var convertedFile = converter.readFile(filecontent); 
+                                if(converter.doDownload())                
+                                    download(convertedFile, converter.getTargetFilename());
+                            };
+                        })();
+                        reader.readAsText(file, 'windows-1252'); //TODO
+                    }
+                    else
+                        notie.alert(3, 'that\'s not a valid source file, expecting ' + converter.getExpectedExtension(), 2);
+                }
+                else
+                    notie.alert(3, 'no converter selected', 1);
             };
             
             function download(content, filename){
@@ -222,10 +266,6 @@
                 document.body.appendChild(element);
                 element.click();
                 document.body.removeChild(element);
-            };
-            
-            function hideContainer(){
-                $('#container').hide();
             };
 
         </script>
