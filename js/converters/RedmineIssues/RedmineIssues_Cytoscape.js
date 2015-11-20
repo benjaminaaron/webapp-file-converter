@@ -13,7 +13,7 @@ RedmineIssues_Cytoscape.prototype = {
     },
     
     settingsDialog: function(){    
-        notie.confirm('Add a root node?', 'Yes', 'No', this.rootYesCallback.bind(this), this.rootNoCallback.bind(this));
+        notie.confirm('Add a root node? <small>(default: No)</small>', 'Yes', 'No', this.rootYesCallback.bind(this), this.rootNoCallback.bind(this));
     },
     
     rootYesCallback: function(){
@@ -26,7 +26,7 @@ RedmineIssues_Cytoscape.prototype = {
     
     settingsDialog2: function(addRoot){
         this.addRoot = addRoot;
-        notie.confirm('Layout direction?', 'top to bottom', 'left to right', this.layoutTopToBottomCallback.bind(this), this.layoutLeftToRightCallback.bind(this));
+        notie.confirm('Layout direction? <small>(default: left to right)</small>', 'top to bottom', 'left to right', this.layoutTopToBottomCallback.bind(this), this.layoutLeftToRightCallback.bind(this));
     },    
     
     layoutTopToBottomCallback: function(){
@@ -40,13 +40,14 @@ RedmineIssues_Cytoscape.prototype = {
     readFile: function(filecontent){
         RedmineIssues.prototype.readFile.call(this, filecontent, this.addRoot);
         var self = this;
-        $('#container').fadeOut('fast', function() {        
+        $('#container').fadeOut('fast', function() {   
             $('#browser-view-container')
-                .width($(document).width() * 0.95) //or window
-                .height($(document).height() * 0.95)
+                .width($(document).width() * 0.98) //or window
+                .height($(document).height() * 0.94)
                 .show();
             var graph = new CytoscapeGraphviewer(document.getElementById('browser-view-container'), self.nodes, self.addRoot, self.layoutRankDir);
             graph.draw();
+            $('#png-link-wrapper').show();
         });
     },    
     
@@ -55,7 +56,7 @@ RedmineIssues_Cytoscape.prototype = {
     },
     
     getPopupPostText: function(){
-        return 'renders the graph of all issues right here in the browser using <a href="http://js.cytoscape.org/">Cytoscape.js</a><br>drag nodes around if you wish';
+        return 'renders the graph of all issues here in the browser using <a href="http://js.cytoscape.org/">Cytoscape.js</a><br>you may drag nodes around and export the graph as PNG';
     }
 };
 
@@ -120,6 +121,6 @@ CytoscapeGraphviewer.prototype = {
                 nodes: this.nodes,
                 edges: this.edges
             },
-        });
+        });    
     }
 };

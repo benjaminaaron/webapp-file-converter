@@ -7,7 +7,7 @@ RedmineIssues_Graphml.prototype = {
     __proto__: RedmineIssues.prototype,
     
     getTitle: function(){    
-        return 'Redmine Issues CSV &rarr; graphml';
+        return 'Redmine Issues CSV &rarr; GraphML';
     },
     
     readFile: function(filecontent){
@@ -17,11 +17,11 @@ RedmineIssues_Graphml.prototype = {
     },
 
     getTargetFilename: function(){
-        return 'RedmineIssuesGraph.graphml';
+        return 'RedmineIssues_' + getTimestamp() + '.graphml';
     },
     
     getPopupPostText: function(){
-        return 'open the graphml-file in <a href=\"http://www.yworks.com/products/yed\">yEd</a><br><br>go to <i>Tools > Fit Node to Label ></i> uncheck <i>Ignore Height</i> and press <i>OK</i><br><br>go to Layout and choose your layout algorithm<br><i>Tree > Directed</i> looks good for instance';
+        return 'open the GraphML file in <a href=\"http://www.yworks.com/products/yed\">yEd</a><br><br>go to <i>Tools > Fit Node to Label ></i> uncheck <i>Ignore Height</i> and press <i>OK</i><br><br>go to Layout and choose your layout algorithm<br><i>Tree > Directed</i> looks good for instance';
     }
 };
 

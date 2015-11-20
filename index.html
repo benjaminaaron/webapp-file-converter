@@ -32,7 +32,7 @@
                 -moz-border-radius: 5px;
                 -webkit-border-radius: 5px;
                 border-radius: 20px;
-                padding: 25px;
+                padding: 30px;
                 text-align: center;
                 font-style: bold;
                 font-size: large;
@@ -42,7 +42,7 @@
                 border: 2px dashed #0f0 !important;
                 background-color: #ffff99;
             }
-            .footer {
+            #footer {
                 font-size: small;
                 color: #ddd;
                 position: fixed; 
@@ -65,7 +65,7 @@
             #selector-table {
                 margin: 0 auto;
             }
-            #selector-table a, #footer a {
+            #selector-table a, #footer a, #png-link {
                 text-decoration: none;
                 color: #999;
                 background-color: #eee;
@@ -74,10 +74,8 @@
             #notie-alert-text a {
                 color: #fff;
             }
-            #browser-view-container { // only for cytoscape.js atm
-                width: 100%;
-                height: 100%;
-                position: absolute;
+            #browser-view-container {
+                position: relative;
                 left: 0;
                 top: 0;
                 z-index: 999;
@@ -87,17 +85,19 @@
     </head>
     <body>
         
-        <!-- vendors -->
+        <!-- vendor script, needs to be imported in the <body> -->
         <script src="js/vendors/notie.js" type="text/javascript" charset="utf-8"></script>
-
-        <input id="file-chooser" type="file" style="display: none;"/>
+        
+        <!-- invisible DOM elements -->
+        <a id="png-link-hidden" style="display:none;" href="#" download="pic.png"></a>
+        <input id="file-chooser" type="file" style="display:none;"/>
 
         <div id="container">
             <br><br>
             <img id="memepic" width="188px" src="files/meme.jpg">
-            <div id="converter-title" style="display: none;">converter title</div>
+            <div id="converter-title" style="display:none;">converter title</div>
             <br><br>
-            <div id="dropzone">drop <span id="dropzone-extension"></span> file here, or&nbsp;&nbsp;<input type="button" disabled="true" id="file-chooser-btn" value="Choose File"/></div>
+            <div id="dropzone">drop <span id="dropzone-extension"></span> file here or&nbsp;&nbsp;<input type="button" disabled="true" id="file-chooser-btn" value="Choose File"/></div>
             <br><br>
             <table id='selector-table'>
                 <tr><td>
@@ -111,18 +111,31 @@
                         <option value="*-*">* &nbsp;&rarr;&nbsp; ...</option>
                     </select>    
                 </td><td>&nbsp;</td><td>
-                    <a id="settings-link" class="links" href="#" style="display: none;">settings</a>    
+                    <a id="settings-link" class="links" href="#" style="display:none;">settings</a>    
                 </td><td>&nbsp;</td><td>
-                    <a id="postinfo-link" class="links" href="#" style="display: none;">post info</a>
+                    <a id="postinfo-link" class="links" href="#" style="display:none;">post info</a>
                 </td>
             </table>
-            <div class="footer"><p>@benjaminaaron, Nov 2015</p></div>
+            <div id="footer"><p>@benjaminaaron, Nov 2015</p></div>
         </div>
-        <div id="browser-view-container" style="display: none;"></div>
+        <div id="png-link-wrapper" style="text-align:center; display:block; display:none;"><a id="png-link" href="#">download as PNG</a></div>
+        <div id="browser-view-container" style="display:none;"></div>
 
         <script>
         
             //var isFirefox = /firefox/.test(navigator.userAgent.toLowerCase());
+
+            document.getElementById('png-link').onclick = function(){
+                var options = {
+                    'bg': 'white',
+                    'full': 'true'
+                };
+                $('#png-link-hidden').attr({
+                    'download': 'RedmineIssues_' + getTimestamp() + '.png',
+                    'href' : window.cy.png(options)
+                });
+                $('#png-link-hidden')[0].click();
+            };
 
             document.getElementById('preinfo-link').onclick = function(){
                 notie.alert(4, converter.getPopupPreText(), 5);
@@ -140,7 +153,7 @@
             
             $('#file-chooser-btn').click(function(e){
               $('#file-chooser').click();
-          });
+            });
 
             var converterStr = '';
             var converter = null;
@@ -160,7 +173,7 @@
                         converterNotImplementedYet();
                 };
                 
-                if(converter)
+                if(converter){
                     $('#memepic').fadeOut('fast', function(){        
                         $('#converter-title')
                             .html('<br><br><br>' + converter.getTitle() + '<br>')
@@ -168,16 +181,18 @@
                         $('.links').fadeIn();
                         $('#dropzone-extension').text('.' + converter.getExpectedExtension());
                         document.getElementById('file-chooser-btn').disabled = false;
-                        return true;  
                     });
-                else
+                    return true;
+                }
+                else{
                     $('#converter-title').fadeOut('fast', function(){
                         $('#memepic').fadeIn();
                         $('.links').fadeOut();
                         $('#dropzone-extension').text();
                         document.getElementById('file-chooser-btn').disabled = true;
-                        return false;
                     });
+                    return false;
+                }
             };
                         
             /*                    
@@ -192,7 +207,7 @@
             
             function converterNotImplementedYet(){
                 notie.alert(3, 'this converter isn\'t implemented yet', 2);
-                $(this)[0].selectedIndex = 0; //TODO fallback to last valid one instead of index 0    
+                $('#converterSelector')[0].selectedIndex = 0; //TODO fallback to last valid one instead of index 0    
             };
             
             var domain = window.location.href;
@@ -201,7 +216,7 @@
                 domain = domain.substring(0, domain.length - urlParams.length);
                 converterStr = urlParams.substring(1, urlParams.length);                
                 if(setConverter(converterStr))
-                    $('#converterSelector').val(converterStr); 
+                    $('#converterSelector').val(converterStr);
             };
 
             var filecontent = '';
@@ -256,16 +271,6 @@
                 }
                 else
                     notie.alert(3, 'no converter selected', 1);
-            };
-            
-            function download(content, filename){
-                var element = document.createElement('a');
-                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
-                element.setAttribute('download', filename);
-                element.style.display = 'none';
-                document.body.appendChild(element);
-                element.click();
-                document.body.removeChild(element);
             };
 
         </script>

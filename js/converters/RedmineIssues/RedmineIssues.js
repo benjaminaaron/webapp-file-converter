@@ -66,7 +66,7 @@ RedmineIssues.prototype = {
     },
         
     getPopupPreText: function(){
-        return 'in Redmine go to the bottom of <i>Issues</i> and <i>export All Columns</i> as CSV<br>you may choose and apply Status \'any\' instead of \'open\' at the top to include closed issues';
+        return 'in Redmine go to the bottom-right of <i>Issues</i> and <i>export All Columns</i> as CSV<br>beforehand you may apply Status \'any\' instead of \'open\' at the top to include closed issues';
     }
     
 };

@@ -1,4 +1,23 @@
 
+function download(content, filename){
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+};
+
+function getTimestamp(){
+    var now = new Date(new Date().getTime());
+    return  now.getFullYear() + '-' +
+            (now.getMonth() + 1) + '-' +
+            now.getDate() + '_' +
+            now.getHours() + '-' +
+            now.getMinutes();
+};
+
 function replaceAll(find, replace, str){
     return str.replace(new RegExp(find, 'g'), replace);
 };
