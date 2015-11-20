@@ -7,13 +7,17 @@ RedmineIssues.prototype = {
     
     __proto__: Converter.prototype,
     
-    readFile: function(filecontent){
+    readFile: function(filecontent, addRoot){
         var csvfile = CSVToArray(filecontent, ',');
         var header = csvfile[0];
         
         this.nodes = [];
-        //var root = new Node('0', undefined, 'root', undefined, undefined);
-        //nodes.push(root);
+        
+        if(addRoot){
+            var root = new Node('0', undefined, 'root', undefined, undefined);
+            this.nodes.push(root);
+        }
+
         var distinctAssigneeNames = [];
         
         var indexParentTask = header.indexOf('Parent task');
@@ -38,14 +42,16 @@ RedmineIssues.prototype = {
             this.nodes.push(new Node(line[0], parentTaskId, line[indexSubject], assignee, line[indexCategory], isClosed));
         }        
         
+        var colorIndex = 0;
         for (var key in distinctAssigneeNames)
             if (distinctAssigneeNames.hasOwnProperty(key))
                 distinctAssigneeNames[key] = Colors.random();
-        distinctAssigneeNames['undefined'] = '#cccccc';
+        distinctAssigneeNames['undefined'] = '#eeeeee';
         
         for(i in this.nodes)
             this.nodes[i].color = distinctAssigneeNames[this.nodes[i].assignee];
-        //root.color = '#ffffff';
+        if(addRoot)
+            root.color = '#ffffff';
     },
     
     sourceFormatOK: function(extension){
@@ -73,14 +79,9 @@ var Node = function(id, parentId, subject, assignee, category, isClosed){
     this.category = category;
     this.isClosed = isClosed;
     this.color;
-    this.shape = 'box';
 };
 
 Node.prototype = {
-    
-    makeLabel: function(){
-        this.label = this.getLabel();
-    },
     
     getLabel: function(){
         var subject = this.subject == undefined || this.subject == '' ? '\nno subject' : this.subject;

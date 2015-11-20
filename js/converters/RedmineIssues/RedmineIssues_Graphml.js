@@ -7,7 +7,7 @@ RedmineIssues_Graphml.prototype = {
     __proto__: RedmineIssues.prototype,
     
     readFile: function(filecontent){
-        RedmineIssues.prototype.readFile.call(this, filecontent);
+        RedmineIssues.prototype.readFile.call(this, filecontent, false);
         var graphmlExporter = new GraphmlExporter(this.nodes);
         return graphmlExporter.getContent();
     },

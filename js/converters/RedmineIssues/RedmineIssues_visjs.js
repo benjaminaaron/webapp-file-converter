@@ -7,7 +7,7 @@ RedmineIssues_visjs.prototype = {
     __proto__: RedmineIssues.prototype,
     
     readFile: function(filecontent){
-        RedmineIssues.prototype.readFile.call(this, filecontent);
+        RedmineIssues.prototype.readFile.call(this, filecontent, false);
         
         hideContainer();
         var visjsContainer = $('#browser-view-container');
