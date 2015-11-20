@@ -31,17 +31,21 @@
                 border: 2px dashed #bbb;
                 -moz-border-radius: 5px;
                 -webkit-border-radius: 5px;
-                border-radius: 5px;
+                border-radius: 20px;
                 padding: 25px;
                 text-align: center;
                 font: 20pt bold;
                 color: #bbb;
             }
-            .info {
+            .predrop {
+                border: 2px dashed #0f0 !important;
+                background-color: #ffff99;
+            }
+            /*.info { //combine with <small>
                 text-align: center;
                 color: #ddd;
-            }
-            img {
+            }*/
+            #memepic {
                 display: block;
                 margin-left: auto;
                 margin-right: auto;
@@ -66,7 +70,7 @@
                 left: 0;
                 top: 0;
                 z-index: 999;
-                border: 1px solid lightgray;
+                /*border: 1px solid lightgray;*/
                 font: 10pt sans;
             }
         </style>
@@ -78,7 +82,7 @@
 
         <div id="container">
             <br><br>
-            <img width="200px" src="files/meme.jpg">
+            <img id="memepic" width="200px" src="files/meme.jpg">
             <br><br>
             <div id="dropzone">drop file here</div> <!-- via www.html5rocks.com/en/tutorials/file/dndfiles -->
             <br><br>
@@ -86,7 +90,7 @@
                 <tr><td>
                     <a id="preinfo-link" href="#">pre info</a>
                 </td><td>&nbsp;</td><td>
-                    <select id="conversionModeSelector">
+                    <select id="converterSelector">
                         <option value="redmineissues-cytoscape">redmine issues csv &nbsp;&rarr;&nbsp; cytoscape</option>
                         <option value="redmineissues-graphml">redmine issues csv &nbsp;&rarr;&nbsp; graphml</option>
                         <option value="xml-csv">xml &nbsp;&rarr;&nbsp; csv</option>
@@ -98,13 +102,6 @@
                     <a id="postinfo-link" href="#">post info</a>
                 </td>
             </table>    
-            <br><br>
-            <!--<div class="info">
-                the file will be converted and "downloaded" (no upload, all happens locally) right away
-            </div>
-            <div class="info"><small>
-                works on the latest Chrome and Firefox, not on Safari yet
-            </small></div>-->
         </div>
         <div id="browser-view-container" style="display: none;"></div>
         
@@ -120,47 +117,48 @@
                 notie.alert(4, converter.getPopupPostText(), 10);
             };
 
-            var domain = window.location.href;
-            var conversionMode = $('#conversionModeSelector').val();
-            var converter = getConverter(conversionMode);
+            var converterStr = $('#converterSelector').val();
+            setConverter(converterStr);
             
-            function getConverter(conversionMode){
-                switch(conversionMode){
+            function setConverter(converterStr){
+                switch(converterStr){
                     case 'redmineissues-cytoscape':
-                        return new RedmineIssues_Cytoscape();
+                        converter = new RedmineIssues_Cytoscape();
+                        return true;
                     case 'redmineissues-graphml':
-                        return new RedmineIssues_Graphml();
+                        converter = new RedmineIssues_Graphml();
+                        return true;
                     default:
-                        return null;
+                        return false;
                 };
             };
                         
             /*                    
             $('#getLink').on('click', function (e) {
-                notie.alert(3, domain + '?' + conversionMode, 4);
+                notie.alert(3, domain + '?' + converterStr, 4);
             });
             */
         
-            $('#conversionModeSelector').on('change', function (e) {
-                conversionMode = $(this).val();    
-                var newConverter = getConverter(conversionMode);
-                if(newConverter != null){
-                    converter = newConverter;
-                }
-                else {
-                    notie.alert(3, 'this converter isn\'t implemented yet', 2);
-                    $(this)[0].selectedIndex = 0; //TODO fallback to last valid one instead of index 0
-                }
+            $('#converterSelector').on('change', function (e) {
+                converterStr = $(this).val();
+                if(!setConverter(converterStr))
+                    converterNotImplementedYet();
             });
             
+            function converterNotImplementedYet(){
+                notie.alert(3, 'this converter isn\'t implemented yet', 2);
+                $(this)[0].selectedIndex = 0; //TODO fallback to last valid one instead of index 0    
+            };
+            
+            var domain = window.location.href;
             var urlParams = window.location.search;
             if(urlParams.length > 0){
                 domain = domain.substring(0, domain.length - urlParams.length);
-                urlParams = urlParams.substring(1, urlParams.length);
-                conversionMode = urlParams;  
-                //TODO catch error
-                $('#conversionModeSelector').val(conversionMode);  
-                converter = getConverter(conversionMode); 
+                converterStr = urlParams.substring(1, urlParams.length);                
+                if(!setConverter(converterStr))
+                    converterNotImplementedYet();
+                else
+                    $('#converterSelector').val(converterStr); 
             };
 
             var filecontent = '';
@@ -168,14 +166,22 @@
             var dropzone = document.getElementById('dropzone');
             dropzone.addEventListener('dragover', handleDragOver, false);
             dropzone.addEventListener('drop', handleFileSelect, false);
+            
+            document.addEventListener('dragover', documentDragOver, false);
+        
+            function documentDragOver(evt) {
+                $('#dropzone').removeClass('predrop');
+            };
         
             function handleDragOver(evt) {
                 evt.stopPropagation();
                 evt.preventDefault();
                 evt.dataTransfer.dropEffect = 'copy';
+                $('#dropzone').addClass('predrop');
             };
 
-            function handleFileSelect(evt) {                 
+            function handleFileSelect(evt) {
+                $('#dropzone').removeClass('predrop');             
                 $('#dropzone').effect('highlight', {}, 1200);
                 evt.stopPropagation();
                 evt.preventDefault();
